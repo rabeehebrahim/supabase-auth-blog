@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import EmailVerification from "./EmailVerification";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const Register = () => {
   // State for input fields
@@ -10,17 +11,30 @@ const Register = () => {
   // State for handling hover and focus effects for styling
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);  
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-  const nav = useNavigate()
+  const nav = useNavigate();
 
   // Handle form submission
-  const handleRegister = (event) => {
+  const handleRegister = async (event) => {
     event.preventDefault();
-
+    if (!email || !password) return alert("Please fill all the details");
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: "http://localhost:5173/",
+        data: {
+          has_user_details: false, // if you want to update metadata
+        },
+      },
+    });
+    if(error) {
+      return alert(error.message || "Failed to authenticate")
+    }    
     setEmail("");
     setPassword("");
-    nav('/email-verify')
+    nav("/email-verify");
   };
 
   // --- Style Objects ---
@@ -145,7 +159,9 @@ const Register = () => {
         >
           Signup
         </button>
-        <p style={{marginTop: "10px"}}>Already have an account? <Link to="/login">Login here</Link></p>
+        <p style={{ marginTop: "10px" }}>
+          Already have an account? <Link to="/login">Login here</Link>
+        </p>
       </form>
     </div>
   );

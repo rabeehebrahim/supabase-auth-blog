@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const Login = () => {
   // State for input fields
@@ -14,9 +15,15 @@ const Login = () => {
   const nav = useNavigate();
 
   // Handle form submission
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {    
     event.preventDefault();
-
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+    if (error) {
+      return alert(error.message || "Failed to authenticate")
+    }
     setEmail("");
     setPassword("");
     nav("/");
@@ -62,7 +69,6 @@ const Login = () => {
     color: "#555",
   };
 
-  // Base input style
   const inputStyle = {
     width: "100%",
     padding: "0.75rem",
@@ -70,10 +76,9 @@ const Login = () => {
     borderRadius: "5px",
     fontSize: "1rem",
     boxSizing: "border-box",
-    transition: "border-color 0.2s, box-shadow 0.2s", // Smooth transition for focus
+    transition: "border-color 0.2s, box-shadow 0.2s", 
   };
 
-  // Dynamic input styles for focus effect
   const emailInputStyle = {
     ...inputStyle,
     borderColor: isEmailFocused ? "#007bff" : "#ccc",
@@ -86,7 +91,6 @@ const Login = () => {
     boxShadow: isPasswordFocused ? "0 0 0 3px rgba(0, 123, 255, 0.2)" : "none",
   };
 
-  // Dynamic button style for hover effect
   const buttonStyle = {
     width: "100%",
     padding: "0.75rem",
@@ -97,7 +101,7 @@ const Login = () => {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "background-color 0.2s ease-in-out",
-    backgroundColor: isButtonHovered ? "#0056b3" : "#007bff", // Changes on hover
+    backgroundColor: isButtonHovered ? "#0056b3" : "#007bff",
   };
 
   return (
